@@ -1,0 +1,37 @@
+---
+const testimonials = [
+  {
+    name: "Leonardo",
+    role: "CEO GeoMakes, Empresa de servicios informáticos",
+    avatar: "https://cdn.discordapp.com/avatars/137640880059318274/6e8df04eb5713bc765d89d67676ccde1.png?size=256",
+    quote:
+      "Bairon se caracteriza por su fiabilidad y eficiencia en todo lo que crea, no para hasta tenerlo pulido y funcionando, hace lo que haga falta para llevar a cabo el proyecto. Una persona 100% confiable.",
+  },
+]
+---
+
+<section id="testimonios" class="flex flex-col gap-4">
+  <h2 class="font-mono text-sm text-muted-foreground">$ cat testimonials.log</h2>
+
+  <div class="flex flex-col gap-4">
+    {testimonials.map((t) => (
+      <div class="rounded-lg border border-border bg-card p-5">
+        <p class="text-sm leading-relaxed text-foreground/80 italic">
+          "{t.quote}"
+        </p>
+        <div class="mt-4 flex items-center gap-3">
+          <img
+            src={t.avatar}
+            alt={t.name}
+            class="size-9 rounded-full border border-border object-cover"
+            loading="lazy"
+          />
+          <div class="flex flex-col">
+            <span class="font-mono text-sm text-foreground">{t.name}</span>
+            <span class="font-mono text-xs text-muted-foreground">{t.role}</span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
