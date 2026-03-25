@@ -1,46 +1,60 @@
-# Astro Starter Kit: Basics
+# bairon.me
+
+Portfolio personal. Astro + Tailwind CSS v4 + shadcn/ui.
+
+## Stack
+
+```
+src/
+├── components/     Astro + React components
+├── layouts/        Base layout (dark mode, light spots)
+├── lib/            DB, auth helpers
+├── pages/
+│   ├── api/        Contact form + notifications API
+│   ├── sudo.astro  Admin panel (login + inbox)
+│   └── index.astro Home
+└── styles/         Tailwind + custom animations
+```
+
+- **Frontend:** Astro 6, React 19, Tailwind CSS v4, shadcn/ui
+- **Backend:** Astro SSR (Node adapter), better-sqlite3
+- **Auth:** bcrypt password hash + HttpOnly session cookie
+- **Deploy:** Docker (Dockerfile included)
+
+## Dev
 
 ```sh
-bun create astro@latest -- --template basics
+bun install
+bun run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Build & Run
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```sh
+bun run build
+node dist/server/entry.mjs
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Docker
 
-## 🧞 Commands
+```sh
+docker build -t portfolio .
+docker run -p 4321:4321 -v portfolio_data:/app/data portfolio
+```
 
-All commands are run from the root of the project, from a terminal:
+> Montar `/app/data` como volumen para persistir la base de datos SQLite.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
+## Env vars (opcionales)
 
-## 👀 Want to learn more?
+| Variable | Default | Descripcion |
+|---|---|---|
+| `ADMIN_PASSWORD_HASH` | hash hardcoded | Hash bcrypt de la password de admin |
+| `ADMIN_SESSION_TOKEN` | `bairon_admin_session` | Token de sesion para cookies |
+| `PORT` | `4321` | Puerto del servidor |
+| `HOST` | `0.0.0.0` | Host del servidor |
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Generar hash:
+
+```sh
+bun -e "const b = require('bcryptjs'); console.log(b.hashSync('TU_PASSWORD', 10))"
+```

@@ -1,0 +1,208 @@
+---
+export const prerender = false
+
+import Layout from "../layouts/Layout.astro"
+import { isAdmin } from "@/lib/admin"
+import { getDb, type ContactMessage } from "@/lib/db"
+
+const authed = isAdmin(Astro.request)
+
+let messages: ContactMessage[] = []
+let unread = 0
+
+if (authed) {
+  const db = getDb()
+  messages = db.prepare("SELECT * FROM contacts ORDER BY created_at DESC").all() as ContactMessage[]
+  unread = messages.filter((m) => !m.read).length
+}
+---
+
+<Layout title="admin — bairon.me">
+  <div class="flex flex-col gap-8 pt-8">
+    {!authed ? (
+      <div class="mx-auto w-full max-w-xs">
+        <a href="/" class="mb-4 inline-flex items-center gap-1 font-mono text-xs text-muted-foreground/50 transition-colors hover:text-foreground">
+          <span>&larr;</span> cd ~
+        </a>
+        <h1 class="mb-6 font-mono text-sm text-muted-foreground">$ sudo login</h1>
+        <form id="login-form" class="flex flex-col gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="password" class="font-mono text-xs text-muted-foreground">password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autofocus
+              class="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/40 outline-none transition-colors focus:border-foreground/20"
+              placeholder="••••••••"
+            />
+          </div>
+          <span id="login-error" class="hidden font-mono text-xs text-red-400"></span>
+          <button
+            type="submit"
+            class="inline-flex w-fit items-center gap-1.5 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 cursor-pointer"
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+    ) : (
+      <div class="flex flex-col gap-6">
+        <a href="/" class="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground/50 transition-colors hover:text-foreground">
+          <span>&larr;</span> cd ~
+        </a>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h1 class="font-mono text-xs text-muted-foreground sm:text-sm">
+            $ cat /var/mail/inbox <span class="text-foreground/50">({messages.length}, {unread} sin leer)</span>
+          </h1>
+          <div class="flex items-center gap-3">
+            {unread > 0 && (
+              <button
+                id="mark-all-read"
+                type="button"
+                class="font-mono text-xs text-muted-foreground/60 transition-colors hover:text-foreground cursor-pointer"
+              >
+                marcar todo leido
+              </button>
+            )}
+            <button
+              id="logout-btn"
+              type="button"
+              class="font-mono text-xs text-red-400/60 transition-colors hover:text-red-400 cursor-pointer"
+            >
+              salir
+            </button>
+          </div>
+        </div>
+
+        {messages.length === 0 ? (
+          <p class="font-mono text-sm text-muted-foreground/50">sin mensajes</p>
+        ) : (
+          <div class="flex flex-col gap-3">
+            {messages.map((msg) => (
+              <div
+                class={`flex flex-col gap-2 rounded-lg border border-border p-4 ${!msg.read ? "bg-muted/20 border-foreground/10" : "bg-card"}`}
+                data-id={msg.id}
+              >
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div class="flex items-center gap-2">
+                    {!msg.read && <span class="size-2 shrink-0 rounded-full bg-red-500" />}
+                    <span class="font-mono text-sm font-medium text-foreground">{msg.name}</span>
+                    <span class="hidden font-mono text-xs text-muted-foreground sm:inline">{msg.email}</span>
+                  </div>
+                  <span class="font-mono text-[10px] text-muted-foreground/40 sm:text-xs">
+                    {new Date(msg.created_at + "Z").toLocaleDateString("es-CL", {
+                      day: "2-digit",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <span class="font-mono text-xs text-muted-foreground sm:hidden">{msg.email}</span>
+                <p class="text-sm text-foreground/80 whitespace-pre-wrap">{msg.message}</p>
+                <div class="flex items-center gap-3">
+                  {!msg.read && (
+                    <button
+                      type="button"
+                      class="msg-read font-mono text-xs text-muted-foreground/50 transition-colors hover:text-foreground cursor-pointer"
+                      data-id={msg.id}
+                    >
+                      marcar leido
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    class="msg-delete font-mono text-xs text-muted-foreground/50 transition-colors hover:text-red-400 cursor-pointer"
+                    data-id={msg.id}
+                  >
+                    eliminar
+                  </button>
+                  <a
+                    href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: Contacto desde bairon.me`)}`}
+                    class="font-mono text-xs text-muted-foreground/50 transition-colors hover:text-foreground"
+                  >
+                    responder
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</Layout>
+
+<script>
+  // Login
+  const loginForm = document.getElementById("login-form") as HTMLFormElement | null
+  const loginError = document.getElementById("login-error") as HTMLSpanElement | null
+
+  loginForm?.addEventListener("submit", async (e) => {
+    e.preventDefault()
+    const password = new FormData(loginForm).get("password") as string
+
+    const res = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    })
+
+    if (res.ok) {
+      window.location.reload()
+    } else {
+      if (loginError) {
+        loginError.textContent = "Contraseña incorrecta"
+        loginError.classList.remove("hidden")
+      }
+    }
+  })
+
+  // Logout
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "logout" }),
+    })
+    window.location.reload()
+  })
+
+  // Mark all read
+  document.getElementById("mark-all-read")?.addEventListener("click", async () => {
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "read-all" }),
+    })
+    window.location.reload()
+  })
+
+  // Mark individual read
+  document.querySelectorAll(".msg-read").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = (btn as HTMLElement).dataset.id
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "read", id: Number(id) }),
+      })
+      window.location.reload()
+    })
+  })
+
+  // Delete
+  document.querySelectorAll(".msg-delete").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = (btn as HTMLElement).dataset.id
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", id: Number(id) }),
+      })
+      window.location.reload()
+    })
+  })
+</script>

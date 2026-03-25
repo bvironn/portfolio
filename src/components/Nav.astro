@@ -1,0 +1,21 @@
+---
+const links = [
+  { label: "stack", href: "#stack" },
+  { label: "proyectos", href: "#proyectos" },
+  { label: "sobre mi", href: "#sobre-mi" },
+  { label: "contacto", href: "#contacto" },
+]
+---
+
+<nav class="sticky top-0 z-50 -mx-6 mb-4 border-b border-border/50 bg-background/80 backdrop-blur-md">
+  <div class="mx-auto flex max-w-2xl items-center justify-center gap-1 px-6 py-3">
+    {links.map((link) => (
+      <a
+        href={link.href}
+        class="rounded-md px-2 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:px-3 sm:text-xs"
+      >
+        {link.label}
+      </a>
+    ))}
+  </div>
+</nav>
