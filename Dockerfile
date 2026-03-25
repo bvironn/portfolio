@@ -1,4 +1,6 @@
-FROM oven/bun:1 AS build
+FROM node:22-slim AS build
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+RUN npm install -g bun
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
