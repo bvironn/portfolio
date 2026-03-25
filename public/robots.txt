@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /sudo
+Disallow: /api/
+
+Sitemap: https://bairon.me/sitemap-index.xml
