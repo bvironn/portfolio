@@ -1,4 +1,8 @@
-const ADMIN_TOKEN = import.meta.env.ADMIN_SESSION_TOKEN ?? "bairon_admin_session"
+const ADMIN_TOKEN = import.meta.env.ADMIN_SESSION_TOKEN || (() => {
+  const token = crypto.randomUUID()
+  console.warn("[admin] ADMIN_SESSION_TOKEN not set — using ephemeral token")
+  return token
+})()
 
 export const isAdmin = (request: Request): boolean => {
   const cookie = request.headers.get("cookie") ?? ""

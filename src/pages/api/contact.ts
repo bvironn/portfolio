@@ -1,5 +1,7 @@
 import type { APIRoute } from "astro"
+
 import { getDb } from "@/lib/db"
+import { contactLimiter, getClientIp } from "@/lib/rateLimiter"
 
 export const prerender = false
 
@@ -7,6 +9,39 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    const siteUrl = import.meta.env.SITE_URL
+
+    if (siteUrl) {
+      const origin = request.headers.get("origin")
+      const referer = request.headers.get("referer")
+
+      if (origin) {
+        if (origin !== siteUrl) {
+          return new Response(JSON.stringify({ success: false, error: "Forbidden" }), {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          })
+        }
+      } else if (referer) {
+        if (!referer.startsWith(siteUrl)) {
+          return new Response(JSON.stringify({ success: false, error: "Forbidden" }), {
+            status: 403,
+            headers: { "Content-Type": "application/json" },
+          })
+        }
+      }
+    }
+
+    const ip = getClientIp(request)
+    const { allowed } = contactLimiter.check(ip)
+
+    if (!allowed) {
+      return new Response(JSON.stringify({ success: false, error: "Too many messages. Try again later." }), {
+        status: 429,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+
     const body = await request.json()
     const { name, email, message } = body
 
