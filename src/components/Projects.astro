@@ -17,7 +17,7 @@ interface Project {
 const projects: Project[] = [
   {
     name: "finza-dashboard",
-    description: "Dashboard financiero personal. Reemplaza las hojas de calculo con transacciones, gastos fijos, proyecciones y analytics por mes.",
+    description: "Dashboard financiero personal. Reemplaza las hojas de cálculo con transacciones, gastos fijos, proyecciones y analytics por mes.",
     url: "https://github.com/bvironn/finza-dashboard",
     language: ["TypeScript", "React", "Hono", "MariaDB", "Drizzle", "shadcn/ui"],
     image: finzaImg,
@@ -25,7 +25,7 @@ const projects: Project[] = [
   },
   {
     name: "delitrack",
-    description: "SaaS de gestion de pagos para repartidores. Multi-tenant, roles, liquidaciones por sucursal.",
+    description: "SaaS de gestión de pagos para repartidores. Multi-tenant, roles, liquidaciones por sucursal.",
     url: "https://github.com/bvironn/delitrack",
     language: ["TypeScript", "Astro", "React", "PostgreSQL", "shadcn/ui"],
     image: delitrackImg,
@@ -50,7 +50,7 @@ const projects: Project[] = [
       const isLastOdd = index === projects.length - 1 && projects.length % 2 !== 0;
       return (
         <div class:list={[
-          "group overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/20",
+          "group overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/20 hover:shadow-lg",
           isLastOdd ? "sm:col-span-2 flex flex-col sm:flex-row" : "flex flex-col",
         ]}>
           {project.image && !project.private && (

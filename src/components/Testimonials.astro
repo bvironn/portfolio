@@ -11,27 +11,28 @@ const testimonials = [
 ---
 
 <section id="testimonios" class="flex flex-col gap-4">
-  <h2 class="font-mono text-sm text-muted-foreground">$ cat testimonials.log</h2>
+  <h2 class="font-mono text-sm text-muted-foreground">$ cat endorsement.log</h2>
 
-  <div class="flex flex-col gap-4">
-    {testimonials.map((t) => (
-      <div class="rounded-lg border border-border bg-card p-5">
-        <p class="text-sm leading-relaxed text-foreground/80 italic">
-          "{t.quote}"
-        </p>
-        <div class="mt-4 flex items-center gap-3">
-          <img
-            src={t.avatar}
-            alt={t.name}
-            class="size-9 rounded-full border border-border object-cover"
-            loading="lazy"
-          />
-          <div class="flex flex-col">
-            <span class="font-mono text-sm text-foreground">{t.name}</span>
-            <span class="font-mono text-xs text-muted-foreground">{t.role}</span>
-          </div>
-        </div>
+  <figure class="rounded-lg border border-border bg-card p-6 sm:p-8">
+    <span aria-hidden="true" class="block font-serif text-4xl leading-none text-muted-foreground/30 select-none">"</span>
+
+    <blockquote class="mt-2">
+      <p class="text-base leading-relaxed text-foreground/80 italic border-l-2 border-border pl-4">
+        {testimonials[0].quote}
+      </p>
+    </blockquote>
+
+    <figcaption class="mt-6 flex items-center gap-3">
+      <img
+        src={testimonials[0].avatar}
+        alt={testimonials[0].name}
+        class="size-9 rounded-full border border-border object-cover"
+        loading="lazy"
+      />
+      <div class="flex flex-col">
+        <span class="font-mono text-sm text-foreground">{testimonials[0].name}</span>
+        <span class="font-mono text-xs text-muted-foreground">{testimonials[0].role}</span>
       </div>
-    ))}
-  </div>
+    </figcaption>
+  </figure>
 </section>
